@@ -21,10 +21,15 @@ default: &default
   # https://guides.rubyonrails.org/configuring.html#database-pooling
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
-development:
-  <<: *default
-  database: myfirststorePSQL_development
-
+development: &default
+  adapter: postgresql
+  #database: myfirststorePSQL_development
+  encoding: utf8
+  min_messages: warning
+  pool: <%= Integer(ENV.fetch("DB_POOL", 5)) %>
+  reaping_frequency: <%= Integer(ENV.fetch("DB_REAPING_FREQUENCY", 10)) %>
+  timeout: 5000
+  url: <%= ENV.fetch("DATABASE_URL", "") %>
   # The specified database role being used to connect to postgres.
   # To create additional roles in postgres see `$ createuser --help`.
   # When left blank, postgres will use the default role. This is
@@ -79,8 +84,13 @@ test:
 # Read https://guides.rubyonrails.org/configuring.html#configuring-a-database
 # for a full overview on how database connection configuration can be specified.
 #
-production:
-  <<: *default
-  database: myfirststorePSQL_production
+production: &deploy
+  encoding: utf8
+  min_messages: warning
+  pool: <%= [Integer(ENV.fetch("MAX_THREADS", 5)), Integer(ENV.fetch("DB_POOL", 5))].max %>
+  timeout: 5000
+  url:  <%= ENV.fetch("DATABASE_URL", "") %>
   username: myfirststorePSQL
   password: <%= ENV['MYFIRSTSTOREPSQL_DATABASE_PASSWORD'] %>
+
+staging: *deploy
